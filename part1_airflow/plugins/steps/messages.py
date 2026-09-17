@@ -31,7 +31,7 @@ def send_telegram_message(context: dict, success: bool) -> None:
     else:
         message = (
             f'Исполнение DAG {dag_id} с id={run_id} завершилось неудачно!\n'
-            f'Упавшая таска: {context.get('task_instance_key_str', 'неизвестно')}'
+            f'Упавшая таска: {context.get("task_instance_key_str", "неизвестно")}'
         )
     
     hook.send_message({

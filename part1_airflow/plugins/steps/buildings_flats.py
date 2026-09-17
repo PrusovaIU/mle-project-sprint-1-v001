@@ -2,7 +2,7 @@ import pandas as pd
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from sqlalchemy import (
     MetaData, Table, Column, Integer, String,
-    Float, Boolean
+    Float, Boolean, UniqueConstraint
 )
 
 
@@ -10,7 +10,7 @@ def create_table() -> None:
     """
     Создание таблицы, в которую будет записан обработанный датасет
     """
-    hook = PostgresHook('destination_db')
+    hook = PostgresHook('db')
     conn = hook.get_sqlalchemy_engine()
     metadata = MetaData()
     Table(
@@ -34,6 +34,7 @@ def create_table() -> None:
         Column('studio', Boolean),
         Column('total_area', Float),
         Column('price', Float),
+        UniqueConstraint('building_id', 'flat_id', name='buildings_flats_building_flat_unique')
     )
     metadata.create_all(conn)
 
@@ -47,7 +48,7 @@ def extract(**kwargs) -> None:
     """
     ti = kwargs['ti']
 
-    hook = PostgresHook('source_db')
+    hook = PostgresHook('db')
     conn = hook.get_conn()
     sql = """
         select
@@ -137,7 +138,7 @@ def load(**kwargs):
     ti = kwargs['ti']
     data = ti.xcom_pull(task_ids='transform', key='transformed_data')
 
-    hook = PostgresHook('destination_db')
+    hook = PostgresHook('db')
     hook.insert_rows(
         table="buildings_flats",
         replace=True,
