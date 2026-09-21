@@ -124,6 +124,12 @@ def transform(**kwargs) -> None:
     # удаление выбросов по количеству комнат:
     filtered_data.drop(filtered_data[filtered_data['rooms'] > 6].index, inplace=True)
     
+    # удаление выбросов по номеру этажа:
+    filtered_data.drop(filtered_data[filtered_data['floor'] > 20].index, inplace=True)
+    
+    # удаление выбросов по количеству этажей в здании:
+    filtered_data.drop(filtered_data[filtered_data['floors_total'] > 29].index, inplace=True)
+
     # Удаление выбросов по стоимости
     filtered_data = filtered_data.drop(
         filtered_data[filtered_data['price'] > 29025000].index
