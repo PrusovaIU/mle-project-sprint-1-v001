@@ -1,13 +1,14 @@
 
 import pandas as pd
 from sqlalchemy import create_engine
+from sqlalchemy.engine.base import Engine
 import os
 from dotenv import load_dotenv
 import yaml
 
 
 
-def create_connection():
+def create_connection() -> Engine:
     """
     Создание подключения к БД с датасетом.
     Параметры подключения запрашиваются из файла .env:
