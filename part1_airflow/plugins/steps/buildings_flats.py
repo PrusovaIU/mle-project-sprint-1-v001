@@ -131,8 +131,9 @@ def transform(**kwargs) -> None:
     filtered_data.drop(filtered_data[filtered_data['floors_total'] > 29].index, inplace=True)
 
     # Удаление выбросов по стоимости
-    filtered_data = filtered_data.drop(
-        filtered_data[filtered_data['price'] > 29025000].index
+    filtered_data.drop(
+        filtered_data[(filtered_data['price'] < 3000000) | (filtered_data['price'] > 29025000)].index, 
+        inplace=True
     )
 
     ti.xcom_push(key='transformed_data', value=filtered_data)
