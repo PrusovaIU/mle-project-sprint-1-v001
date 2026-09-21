@@ -3,18 +3,7 @@ import os
 import pandas as pd
 import yaml
 from sklearn.model_selection import GroupShuffleSplit, train_test_split
-
-
-def load_params(path: str = "params.yaml") -> dict:
-    """
-    Загрузка гиперпараметров DVS.
-
-    :param path: Путь до файла с гиперпараметрами.
-
-    :return: Словарь с загруженными гиперпараметрами.
-    """
-    with open(path, "r") as f:
-        return yaml.safe_load(f)
+from .utils import load_params
 
 
 def split_data() -> None:

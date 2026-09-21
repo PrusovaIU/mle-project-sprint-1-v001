@@ -9,16 +9,33 @@ stages:
       - sslmode
     outs:
       - data/initial_data.csv
+
+  split_data:
+    cmd: python scripts/split.py
+    deps:
+      - data/initial_data.csv
+      - scripts/split.py
+    params:
+      - data.initial_data_path
+      - data.train_path
+      - data.val_path
+      - data.target_col
+      - split.test_size
+      - split.random_state
+      - split.group_col
+    outs:
+      - data/train.csv
+      - data/val.csv
+
   fit_model:
     cmd: python scripts/fit.py
     deps:
-      - data/initial_data.csv
+      - data/train.csv
       - scripts/fit.py
     params:
-      - data.initial_data_path
+      - data.train_path
       - data.model_path
-      - split.test_size
-      - split.random_state
+      - data.target_col
       - model.iterations
       - model.learning_rate
       - model.depth
@@ -27,3 +44,18 @@ stages:
       - model.verbose
     outs:
       - models/fitted_model.pkl
+
+  evaluate_model:
+    cmd: python scripts/evaluate.py
+    deps:
+      - data/val.csv
+      - models/fitted_model.pkl
+      - scripts/evaluate.py
+    params:
+      - data.val_path
+      - data.model_path
+      - data.target_col
+      - evaluate.metrics_path
+    metrics:
+      - cv_results/metrics.json:
+          cache: false
