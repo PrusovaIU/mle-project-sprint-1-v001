@@ -1,21 +1,25 @@
-import argparse
 import os
 import pickle
-from pathlib import Path
 
 import pandas as pd
 import yaml
 from category_encoders import CatBoostEncoder
 from catboost import CatBoostRegressor
 from sklearn.compose import ColumnTransformer
-from sklearn.metrics import (
-    mean_absolute_error,
-    mean_absolute_percentage_error,
-    r2_score,
-)
-from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
+
+
+def load_params(path: str = "params.yaml") -> dict:
+    """
+    Загрузка гиперпараметров DVS.
+
+    :param path: Путь до файла с гиперпараметрами.
+
+    :return: Словарь с загруженными гиперпараметрами.
+    """
+    with open(path, "r") as f:
+        return yaml.safe_load(f)
 
 
 def build_pipeline(params: dict) -> Pipeline:
@@ -43,92 +47,49 @@ def build_pipeline(params: dict) -> Pipeline:
         remainder="drop",
     )
 
-    model_params = params["model"]
-
     model = CatBoostRegressor(
-        iterations=model_params["iterations"],
-        learning_rate=model_params["learning_rate"],
-        depth=model_params["depth"],
-        loss_function=model_params["loss_function"],
-        random_state=model_params["random_state"],
-        verbose=model_params["verbose"],
+        iterations=params["model"]["iterations"],
+        learning_rate=params["model"]["learning_rate"],
+        depth=params["model"]["depth"],
+        loss_function=params["model"]["loss_function"],
+        random_state=params["model"]["random_state"],
+        verbose=params["model"]["verbose"],
     )
 
     return Pipeline(steps=[("preprocessor", preprocessor), ("model", model)])
 
 
-def model_eval(y_val: pandas.Series, y_pred: numpy.ndarray) -> None:
-    """
-    Оценка обученной модели по метрикам MAE, MAPE и R^2.
-
-    :param y_val: целевая переменная из валидационного сета.
-    :param y_pred: целевая переменная, предсказанная для валидационного сета.
-
-    :return: None.
-    """
-    mae = mean_absolute_error(y_val, y_pred)
-    mape = mean_absolute_percentage_error(y_val, y_pred) * 100
-    r2 = r2_score(y_val, y_pred)
-    print(f"MAE:  {mae:.2f}")
-    print(f"MAPE: {mape:.2f}%")
-    print(f"R^2:  {r2:.4f}")
-
-
-def fit():
+def fit_model():
     """
     Обучение модели для решения регрессионной задачи прогнозирования стоимость недвижимости.
 
-    Использует следующие гиперпараметры:
-
-      - data.initial_data_path
-      - data.model_path
-      - split.test_size
-      - split.random_state
-      - model.iterations
-      - model.learning_rate
-      - model.depth
-      - model.loss_function
-      - model.random_state
-      - model.verbose
-
-    Обучающий датасет считывается из data.initial_data_path. 
+    Обучающий датасет считывается из data.train_path. Имя целевой переменной считывается из гиперпараметра data.target_col.
     Данные обученной модели сохраняются в data.model_path.
 
     :return: None.
     """
     # загрузка гиперпараметров:
-    with open('params.yaml', 'r') as fd:
-        params = yaml.safe_load(fd)
+    params = load_params()
 
     data_params = params["data"]
-    data_path = data_params["initial_data_path"]
+    train_path = data_params["train_path"]
     model_path = data_params["model_path"]
+    target_col = data_params["target_col"]
 
-    split_params = params["split"]
-    test_size = split_params["test_size"]
-    random_state = split_params["random_state"]
+    # загрузка обучающего датасета:
+    train = pd.read_csv(train_path)
+    X_tr = train.drop(columns=[target_col])
+    y_tr = train[target_col]
 
-    # подготовка данных для обучения:
-    data = pd.read_csv(data_path)
-    X_tr, X_val, y_tr, y_val = train_test_split(
-        data, data["price"],
-        test_size=test_size,
-        random_state=random_state,
-    )
-
-    # трансформация признаков и обучение:
+    # обучение модели:
     pipeline = build_pipeline(params)
     pipeline.fit(X_tr, y_tr)
 
-    # обучение и оценка модели:
-    y_pred = pipeline.predict(X_val)
-    model_eval(y_val, y_pred)
-
-    # сохранение данных:
-    Path(model_path).parent.mkdir(parents=True, exist_ok=True)
+    # сохранение результатов:
+    os.makedirs(os.path.dirname(model_path), exist_ok=True)
     with open(model_path, "wb") as f:
         pickle.dump(pipeline, f)
 
 
 if __name__ == "__main__":
-    fit()
+    fit_model()
