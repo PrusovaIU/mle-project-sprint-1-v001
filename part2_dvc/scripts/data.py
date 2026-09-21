@@ -1,14 +1,13 @@
+import os
 
 import pandas as pd
+import yaml
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.engine.base import Engine
-import os
-from dotenv import load_dotenv
-import yaml
 
 
-
-def create_connection() -> Engine:
+def create_connection(sslmode: str = "require") -> Engine:
     """
     Создание подключения к БД с датасетом.
     Параметры подключения запрашиваются из файла .env:
@@ -19,38 +18,47 @@ def create_connection() -> Engine:
     - DB_DESTINATION_USER
     - DB_DESTINATION_PASSWORD
 
+    :param sslmode: режим SSL для подключения к PostgreSQL.
     :return: новое подключение к БД.
     """
     load_dotenv()
-    host = os.environ.get('DB_DESTINATION_HOST')
-    port = os.environ.get('DB_DESTINATION_PORT')
-    db = os.environ.get('DB_DESTINATION_NAME')
-    username = os.environ.get('DB_DESTINATION_USER')
-    password = os.environ.get('DB_DESTINATION_PASSWORD')
-    
-    print(f'postgresql://{username}:{password}@{host}:{port}/{db}')
-    conn = create_engine(f'postgresql://{username}:{password}@{host}:{port}/{db}', connect_args={'sslmode':'require'})
+    host = os.environ.get("DB_DESTINATION_HOST")
+    port = os.environ.get("DB_DESTINATION_PORT")
+    db = os.environ.get("DB_DESTINATION_NAME")
+    username = os.environ.get("DB_DESTINATION_USER")
+    password = os.environ.get("DB_DESTINATION_PASSWORD")
+
+    conn = create_engine(
+        f"postgresql://{username}:{password}@{host}:{port}/{db}",
+        connect_args={"sslmode": sslmode},
+    )
     return conn
 
 
 def get_data():
     """
-    Загрузка данных: данные выгпружаются из БД и сохраняются в файл data/initial.csv
+    Загрузка данных: данные выгружаются из БД и сохраняются в файл,
+    указанный в params.yaml.
 
-    В проуессе выполнения задачи загружаются гиперпараметры:
+    В процессе выполнения задачи загружаются гиперпараметры:
     - table
+    - output_path
+    - sslmode
     """
-    # загрузка гиперпараметров
-    with open('params.yaml', 'r') as fd:
+    with open("params.yaml", "r") as fd:
         params = yaml.safe_load(fd)
 
-    conn = create_connection()
-    data = pd.read_sql(f'select * from {params['table']}', conn)
+    table = params["table"]
+    output_path = params["output_path"]
+    sslmode = params.get("sslmode", "require")
+
+    conn = create_connection(sslmode=sslmode)
+    data = pd.read_sql(f"select * from {table}", conn)
     conn.dispose()
 
-    os.makedirs('data', exist_ok=True)
-    data.to_csv('data/initial_data.csv', index=None)
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    data.to_csv(output_path, index=None)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     get_data()
