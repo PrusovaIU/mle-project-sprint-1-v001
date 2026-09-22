@@ -8,18 +8,7 @@ from catboost import CatBoostRegressor
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
-
-
-def load_params(path: str = "params.yaml") -> dict:
-    """
-    Загрузка гиперпараметров DVS.
-
-    :param path: Путь до файла с гиперпараметрами.
-
-    :return: Словарь с загруженными гиперпараметрами.
-    """
-    with open(path, "r") as f:
-        return yaml.safe_load(f)
+from .utils import load_params
 
 
 def build_pipeline(params: dict) -> Pipeline:
