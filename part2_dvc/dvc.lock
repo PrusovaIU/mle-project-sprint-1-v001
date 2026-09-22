@@ -16,6 +16,10 @@ stages:
       hash: md5
       md5: 0f59015da7adf7625759157a6909c657
       size: 14107719
+      cloud:
+        my_storage:
+          etag: 0f59015da7adf7625759157a6909c657
+          version_id: 00065C0EEF96AAE3
   split_data:
     cmd: python -m scripts.split
     deps:
@@ -40,10 +44,18 @@ stages:
       hash: md5
       md5: 7a2fa7affdeec410167a89bfb476d533
       size: 11280865
+      cloud:
+        my_storage:
+          etag: 7a2fa7affdeec410167a89bfb476d533
+          version_id: 00065C0EEFA49D89
     - path: data/val.csv
       hash: md5
       md5: e0262a155192358e809b90fcfceb6d11
       size: 2820418
+      cloud:
+        my_storage:
+          etag: e0262a155192358e809b90fcfceb6d11
+          version_id: 00065C0EEF98F467
   fit_model:
     cmd: python -m scripts.fit
     deps:
@@ -71,6 +83,10 @@ stages:
       hash: md5
       md5: bb3f53917ed46c28ab048ddf734b67d1
       size: 1124570
+      cloud:
+        my_storage:
+          etag: bb3f53917ed46c28ab048ddf734b67d1
+          version_id: 00065C0EEF9948CE
   evaluate_model:
     cmd: python -m scripts.evaluate
     deps:
@@ -97,3 +113,7 @@ stages:
       hash: md5
       md5: f8831cb99f724d4c0091a1cd3979dc4d
       size: 86
+      cloud:
+        my_storage:
+          etag: f8831cb99f724d4c0091a1cd3979dc4d
+          version_id: 00065C0EEF985147
