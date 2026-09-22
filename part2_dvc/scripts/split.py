@@ -22,7 +22,6 @@ def split_data() -> None:
     data_path = data_params["initial_data_path"]
     train_path = data_params["train_path"]
     val_path = data_params["val_path"]
-    target_col = data_params["target_col"]
 
     split_params = params["split"]
     test_size = split_params["test_size"]

@@ -1,17 +1,16 @@
 stages:
   get_data:
-    cmd: python scripts/data.py
+    cmd: python -m scripts.data
     deps:
       - scripts/data.py
     params:
       - table
       - output_path
-      - sslmode
     outs:
       - data/initial_data.csv
 
   split_data:
-    cmd: python scripts/split.py
+    cmd: python -m scripts.split
     deps:
       - data/initial_data.csv
       - scripts/split.py
@@ -22,13 +21,12 @@ stages:
       - data.target_col
       - split.test_size
       - split.random_state
-      - split.group_col
     outs:
       - data/train.csv
       - data/val.csv
 
   fit_model:
-    cmd: python scripts/fit.py
+    cmd: python -m scripts.fit
     deps:
       - data/train.csv
       - scripts/fit.py
@@ -46,7 +44,7 @@ stages:
       - models/fitted_model.pkl
 
   evaluate_model:
-    cmd: python scripts/evaluate.py
+    cmd: python -m scripts.evaluate
     deps:
       - data/val.csv
       - models/fitted_model.pkl
@@ -57,5 +55,4 @@ stages:
       - data.target_col
       - evaluate.metrics_path
     metrics:
-      - cv_results/metrics.json:
-          cache: false
+      - cv_results/metrics.json

@@ -7,31 +7,28 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine.base import Engine
 
 
-def create_connection(sslmode: str = "require") -> Engine:
+def create_connection() -> Engine:
     """
     Создание подключения к БД с датасетом.
     Параметры подключения запрашиваются из файла .env:
 
-    - DB_DESTINATION_HOST
-    - DB_DESTINATION_PORT
-    - DB_DESTINATION_NAME
-    - DB_DESTINATION_USER
-    - DB_DESTINATION_PASSWORD
+    - DB_HOST
+    - DB_PORT
+    - DB_NAME
+    - DB_USER
+    - DB_PASSWORD
 
     :param sslmode: режим SSL для подключения к PostgreSQL.
     :return: новое подключение к БД.
     """
     load_dotenv()
-    host = os.environ.get("DB_DESTINATION_HOST")
-    port = os.environ.get("DB_DESTINATION_PORT")
-    db = os.environ.get("DB_DESTINATION_NAME")
-    username = os.environ.get("DB_DESTINATION_USER")
-    password = os.environ.get("DB_DESTINATION_PASSWORD")
+    host = os.environ.get("DB_HOST")
+    port = os.environ.get("DB_PORT")
+    db = os.environ.get("DB_NAME")
+    username = os.environ.get("DB_USER")
+    password = os.environ.get("DB_PASSWORD")
 
-    conn = create_engine(
-        f"postgresql://{username}:{password}@{host}:{port}/{db}",
-        connect_args={"sslmode": sslmode},
-    )
+    conn = create_engine(f"postgresql://{username}:{password}@{host}:{port}/{db}")
     return conn
 
 
@@ -50,9 +47,8 @@ def get_data():
 
     table = params["table"]
     output_path = params["output_path"]
-    sslmode = params.get("sslmode", "require")
 
-    conn = create_connection(sslmode=sslmode)
+    conn = create_connection()
     data = pd.read_sql(f"select * from {table}", conn)
     conn.dispose()
 
