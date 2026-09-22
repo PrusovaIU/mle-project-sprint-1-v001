@@ -36,13 +36,15 @@ def build_pipeline(params: dict) -> Pipeline:
         remainder="drop",
     )
 
+    model_params = params["model"]
+
     model = CatBoostRegressor(
-        iterations=params["model"]["iterations"],
-        learning_rate=params["model"]["learning_rate"],
-        depth=params["model"]["depth"],
-        loss_function=params["model"]["loss_function"],
-        random_state=params["model"]["random_state"],
-        verbose=params["model"]["verbose"],
+        iterations=model_params["iterations"],
+        learning_rate=model_params["learning_rate"],
+        depth=model_params["depth"],
+        loss_function=model_params["loss_function"],
+        random_state=model_params["random_state"],
+        verbose=model_params["verbose"],
     )
 
     return Pipeline(steps=[("preprocessor", preprocessor), ("model", model)])
